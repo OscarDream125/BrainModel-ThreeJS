@@ -7,10 +7,10 @@ import { useEffect } from "react";
 
 import * as THREE from "three";
 import { extend } from '@react-three/fiber'
-import {shaderMaterial} from '@react-three/drei'
-import {useMemo, useRef} from 'react'
-import {useFrame} from '@react-three/fiber'
-import {Tubes} from './BrainTubes'
+import { shaderMaterial } from '@react-three/drei'
+import { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { Tubes } from './BrainTubes'
 const randomRange = (min, max) => Math.random() * (max - min) + min;
 let curves = [];
 // curves
@@ -22,7 +22,7 @@ for (let i = 0; i < 100; i++) {
     points.push(
       new THREE.Vector3().setFromSphericalCoords(
         0.1,
-        Math.PI - (j / 100) * Math.PI*length,
+        Math.PI - (j / 100) * Math.PI * length,
         (i / 100) * Math.PI * 2
       )
     );
@@ -33,75 +33,76 @@ for (let i = 0; i < 100; i++) {
 
 let brainCurves = []
 
-PATHS.forEach((path)=>{
+PATHS.forEach((path) => {
   let points = []
-  for(let i = 0;i<path.length; i+=3){
-    points.push(new THREE.Vector3(path[i],path[i+1],path[i+2]))
+  for (let i = 0; i < path.length; i += 3) {
+    points.push(new THREE.Vector3(path[i], path[i + 1], path[i + 2]))
   }
   let tempcurve = new THREE.CatmullRomCurve3(points)
   brainCurves.push(tempcurve)
 })
 
 
-function BrainParticles({allthecurves}){
+function BrainParticles({ allthecurves }) {
   let density = 10;
-  let numberOfPoints = density*allthecurves.length
-  const myPoints  = useRef([])
-  const brainGeo  = useRef()
-  let positions = useMemo(()=>{
+  let numberOfPoints = density * allthecurves.length
+  const myPoints = useRef([])
+  const brainGeo = useRef()
+  let positions = useMemo(() => {
     let positions = []
     for (let i = 0; i < numberOfPoints; i++) {
       positions.push(
-        randomRange(-1,1),
-        randomRange(-1,1),
-        randomRange(-1,1)
+        randomRange(-1, 1),
+        randomRange(-1, 1),
+        randomRange(-1, 1)
       )
     }
     return new Float32Array(positions)
-  },[])
+  }, [])
 
-  let randoms = useMemo(()=>{
+  let randoms = useMemo(() => {
     let randoms = []
     for (let i = 0; i < numberOfPoints; i++) {
       randoms.push(
-        randomRange(0.3,1.),
+        randomRange(0.3, 1.),
       )
     }
     return new Float32Array(randoms)
-  },[])
+  }, [])
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
     for (let i = 0; i < allthecurves.length; i++) {
-    for (let j = 0; j < density; j++) {
+      for (let j = 0; j < density; j++) {
 
-      myPoints.current.push({
-        currentOffset: Math.random(),
-        speed: Math.random()*0.001,
-        curve: allthecurves[i],
-        curPosition: Math.random()
-      })
+        myPoints.current.push({
+          currentOffset: Math.random(),
+          speed: Math.random() * 0.001,
+          curve: allthecurves[i],
+          curPosition: Math.random()
+        })
 
-      
-    }}
+
+      }
+    }
 
   })
 
 
-  useFrame(({clock})=>{
+  useFrame(({ clock }) => {
     let curpositions = brainGeo.current.attributes.position.array;
 
     for (let i = 0; i < myPoints.current.length; i++) {
 
       myPoints.current[i].curPosition += myPoints.current[i].speed;
-      myPoints.current[i].curPosition = myPoints.current[i].curPosition%1
+      myPoints.current[i].curPosition = myPoints.current[i].curPosition % 1
 
       let curPoint = myPoints.current[i].curve.getPointAt(myPoints.current[i].curPosition)
 
-      curpositions[i*3] = curPoint.x
-      curpositions[i*3+1] = curPoint.y
-      curpositions[i*3+2] = curPoint.z
+      curpositions[i * 3] = curPoint.x
+      curpositions[i * 3 + 1] = curPoint.y
+      curpositions[i * 3 + 2] = curPoint.z
 
     }
 
@@ -139,7 +140,7 @@ function BrainParticles({allthecurves}){
       }
     `
   )
-  
+
   // declaratively
   extend({ BrainParticleMaterial })
 
@@ -148,7 +149,7 @@ function BrainParticles({allthecurves}){
       <bufferGeometry attach="geometry" ref={brainGeo}>
         <bufferAttribute
           attach='attributes-position'
-          count={positions.length/3}
+          count={positions.length / 3}
           array={positions}
           itemSize={3}
         />
@@ -159,14 +160,14 @@ function BrainParticles({allthecurves}){
           itemSize={1}
         />
       </bufferGeometry>
-      <brainParticleMaterial 
+      <brainParticleMaterial
         attach="material"
         depthTest={false}
         transparent={true}
         depthWrite={false}
-        blending = {THREE.AdditiveBlending}
+        blending={THREE.AdditiveBlending}
 
-         />
+      />
     </points>
   </>
 }
@@ -175,12 +176,12 @@ function BrainParticles({allthecurves}){
 
 export default function App() {
   return (
-    <Canvas camera={{position:[0,0,0.3], near: 0.001, far: 5}}>
+    <Canvas camera={{ position: [0, 0, 0.3], near: 0.001, far: 5 }}>
       <color attach="background" args={["black"]} />
       <ambientLight />
       <pointLight position={[10, 10, 10]} />
-      <Tubes allthecurve={brainCurves}/>
-      <BrainParticles allthecurves={brainCurves}/>
+      <Tubes allthecurve={brainCurves} />
+      <BrainParticles allthecurves={brainCurves} />
       <OrbitControls />
     </Canvas>
   );
